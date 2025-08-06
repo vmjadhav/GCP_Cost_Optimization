@@ -1,0 +1,7 @@
+Based on your BigQuery usage of 100.81 TiB of data processed in the last 30 days, the following is
+the most cost-effective slot allocation strategy:  *   **Flat-Rate Slots**: It is recommended to
+purchase 1 flat-rate slot. This will handle the majority of your query workload (100 TiB). *   **On-
+Demand Usage**: The remaining 0.81 TiB of data can be processed using the on-demand model.  By
+adopting this hybrid approach, you can significantly reduce your BigQuery costs by committing to a
+minimal number of flat-rate slots for your baseline usage while retaining the flexibility of on-
+demand processing for any additional workload.
