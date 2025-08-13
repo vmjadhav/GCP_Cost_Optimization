@@ -19,7 +19,7 @@ def optimize_slots(query_demand: float, total_slot_used: int=50):
 
     Args:
         query_demand (float): Total BigQuery query demand expressed in tebibytes (TiB) of processed data.
-        max_slots (int, optional): Maximum number of reserved slots allowed in the optimization. Default is 50.
+        total_slot_used (int, optional): Maximum number of reserved slots allowed in the optimization. Default is 50.
 
     Returns:
         tuple:
