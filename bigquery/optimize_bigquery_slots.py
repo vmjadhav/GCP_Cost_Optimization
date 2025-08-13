@@ -2,10 +2,9 @@
 
 # Step 1 : Import the linear solver wrapper,
 from ortools.linear_solver import pywraplp
-from .bigquery_byte_scanned import get_query_demand
 from .bigquery_cost_calculator import calculate_bigquery_cost
 
-def optimize_slots(query_demand: float, total_slot_used: int=50):
+def optimize_slots(query_demand: float, total_slot_hours_consumed:float , total_slot_used: int=50):
     """
     Optimize the allocation between reserved BigQuery slots and on-demand bytes processed to minimize cost.
 
@@ -45,9 +44,9 @@ def optimize_slots(query_demand: float, total_slot_used: int=50):
     region = 'us'                  # The region your BigQuery datasets reside in
     tb_processed = query_demand    # Total TB processed in on-demand pricing
     reserved_slots = solver.IntVar(0, total_slot_used, 'reserved_slots')     # Number of flat-rate slots reserved
-    hours_per_month = 24 * 30      # Assuming reserved slots are used all month
-
-    cost_details = calculate_bigquery_cost(region, tb_processed, reserved_slots, hours_per_month)
+    
+    
+    cost_details = calculate_bigquery_cost(region, tb_processed, reserved_slots, total_slot_hours_consumed)
 
     # Costs
     slot_cost = float(cost_details['flat_rate_slot_hourly_cost'])  # $/slot-hour
@@ -86,3 +85,5 @@ def optimize_slots(query_demand: float, total_slot_used: int=50):
 # Project Optimized cloud spend ::
 # 0.04 * 24 * 30 - per slot = 28.8
 # reserved_slots - 28.8 * 5 = $144
+
+#optimize_slots(100.81, 72, 10)
