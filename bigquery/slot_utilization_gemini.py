@@ -30,12 +30,15 @@ def get_bigquery_slot_utilization_for_project(days_back: int = 30):
         creation_time,
         total_slot_ms,
         job_type,
-        state
+        state,
+        UNIX_MILLIS(start_time) AS start_time_epoch,
+        UNIX_MILLIS(end_time) AS end_time_epoch
     FROM
         `{PROJECT_ID}`.`region-us`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
     WHERE
         creation_time BETWEEN TIMESTAMP('{start_time.isoformat()}')
         AND TIMESTAMP('{end_time.isoformat()}')
+
     """
 
     #print(f"Executing BigQuery query for project '{PROJECT_ID}'...")
@@ -46,6 +49,7 @@ def get_bigquery_slot_utilization_for_project(days_back: int = 30):
         rows = list(query_job.result())  # Waits for the query to complete
 
         total_slot_ms_sum = 0
+        total_time_difference = 0;
         successful_jobs_count = 0
         failed_jobs_count = 0
         total_jobs_count = 0
@@ -56,7 +60,12 @@ def get_bigquery_slot_utilization_for_project(days_back: int = 30):
                 ms = 0
                 if row.total_slot_ms is not None:
                     ms = row.total_slot_ms 
-                total_slot_ms_sum += ms
+                    total_slot_ms_sum += ms
+
+                if row.end_time_epoch is not None and row.start_time_epoch is not None:
+                    time_diff = row.end_time_epoch - row.start_time_epoch
+                    total_time_difference += time_diff
+
                 successful_jobs_count += 1
             elif row.state == 'DONE' and row.job_type != 'QUERY':
                 # Consider other job types if relevant for your "utilization" definition
@@ -85,7 +94,8 @@ def get_bigquery_slot_utilization_for_project(days_back: int = 30):
             #"failed_jobs": failed_jobs_count,
             #"total_slot_ms_consumed": total_slot_ms_sum,
             #"analysis_period_ms": period_ms,
-            "total_slot_hours_consumed":  round(float(total_slot_ms_sum / (1000 * 60 * 60)), 2)
+            "total_slot_hours_consumed":  round(float(total_slot_ms_sum / (1000 * 60 * 60)), 2),
+            "total_slot_used": round(float(total_slot_ms_sum / total_time_difference), 2),
             # Add more calculations as needed, e.g., average slots used
             # average_slots_per_second = total_slot_ms_sum / period_ms if period_ms > 0 else 0
         }
