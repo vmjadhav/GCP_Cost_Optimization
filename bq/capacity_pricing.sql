@@ -1,0 +1,8 @@
+SELECT
+  SUM(total_slot_ms) / 3600000 AS slot_hours
+FROM
+  `region-us`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+WHERE
+  job_type = 'QUERY'
+  AND creation_time >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 30 DAY)
+  
